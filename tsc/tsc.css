@@ -1,0 +1,25 @@
+.main {
+	background-color: black;
+}
+.list {
+	background-color: black;
+	color: rgba(0, 120, 0, 255);
+}
+.type {
+	background-color: black;
+	color: rgba(0, 120, 0, 255);
+	margin-bottom: 2px;
+	border-bottom: 1px solid rgba(0, 241, 15, 255);
+}
+.type-staved {
+	background-color: black;
+	color: rgba(0, 120, 0, 255);
+	margin-bottom: 2px;
+	/*
+	seems we need to dive in further to the more svg build chainage for this kind of idea and more.
+	next of gjs quest will ge oh-great-sound thingy.
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgba(21, 221, 0, 255);
+	*/
+}

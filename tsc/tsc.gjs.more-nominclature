@@ -1,0 +1,146 @@
+#!/usr/bin/env gjs
+imports.gi.versions.Gtk = '3.0';
+const Gtk = imports.gi.Gtk;
+const Gdk = imports.gi.Gdk;
+const GLib = imports.gi.GLib;
+//const {Gdk Gtk} = imports.gi;
+
+Gtk.init(null);
+let type_staved_clerkesses = {
+	init: function(naof_pad_entrees, win, list) {
+		let tsc = {
+			init: function() {
+				//let screen = Gdk.Screen.get_default();
+				//log("screen | " + screen);
+				let display = Gdk.Display.get_default();
+				log("display | " + display);
+				this.clipboard = Gtk.Clipboard.get_default(display);
+				log("clipboard | " + this.clipboard);
+				this.clipboard.connect("owner-change", this.on_type_staved_update);
+				this.clipboard.tsc = this;
+				this.pad = [];
+				this.com_pad_site = naof_pad_entrees;
+				this.win = win;
+				this.list = list;
+				//log("Object.keys(this) | " + Object.keys(this));
+			},
+			set_clipboard_text: function(text) {
+					this.clipboard.set_text(text, -1);
+					this.clipboard.store();
+			},
+			get_clipboard_text: function() {
+				return this.clipboard.wait_for_text();
+			},
+			on_type_staved_update: function(clipboard, event) {
+				let tsc = clipboard.tsc
+				//log("event | " + event);
+				//log("Object.keys(this) | " + Object.keys(this));
+				//let new_entree = clipboard.wait_for_text();
+				let new_entree = tsc.get_clipboard_text();
+				log("new-entree | " + new_entree);
+				let pad_site = tsc.pad.length;
+				log("pad-site | " + pad_site);
+				log("com-pad-site | " + tsc.com_pad_site);
+				if(pad_site >= tsc.com_pad_site) {
+					let naof_lets = pad_site - tsc.com_pad_site + 1;
+					//log("noaf-lets | " + naof_lets);
+					tsc.pad = tsc.pad.slice(naof_lets, pad_site)
+					let types = tsc.list.get_children();
+					let tsite = 0;
+					while(true) {
+						if(tsite == naof_lets) {
+							break;
+						}
+						let type = types[tsite];
+						// destroy us ... you did not destroy us.
+						// destroy is in regards to through the ais and who in the nower is cutting the other down.
+						// the creedists leviest are crackin onto at their most over not destroy of others.
+						// in prose of could we for bolder nominclature seize.
+						log("they all speak the same aon aouts | " + type.arg);
+						type.destroy();
+						tsite += 1;
+					}
+				}
+				tsc.pad.push(new_entree);
+				//log("pad | " + tsc.pad);
+
+				let text_view = new Gtk.TextView();
+				text_view.get_buffer().set_text(new_entree, -1);
+				text_view.set_editable(false);
+				text_view.set_cursor_visible(false);
+				text_view.set_accepts_tab(false); 
+				text_view.set_size_request(500, 21);
+				text_view.arg = 0xaed;
+				text_view.add_events(Gdk.EventMask.BUTTON_PRESS_MASK);
+				text_view.connect("button-press-event", (tv, event) => {
+					let selected_entree = tv.get_buffer().text;
+					log("clerkess is setting your then pad to | " + selected_entree);
+					tsc.set_clipboard_text(selected_entree);
+				})
+				tsc.list.add(text_view);
+				sc = text_view.get_style_context();
+				sc.add_class("type")
+				sc.add_provider(cssc, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+				tsc.win.show_all();
+
+				let types = tsc.list.get_children();
+				let naof_types = types.length;
+				let tsite = 0;
+				while(true) {
+					if(tsite == naof_types) {
+						break;
+					}
+					let type = types[tsite];
+					type.now_site = tsite; // as in then-nao
+					tsite += 1;
+				}
+			}
+			/*
+			*/
+		}
+		tsc.init();
+		return tsc;
+	},
+}
+
+// Initialize GTK (required)
+const builder = new Gtk.Builder();
+builder.add_from_file("tsc.ui");
+let cssc = new Gtk.CssProvider();
+cssc.load_from_path("tsc.css");
+const win = builder.get_object("main");
+sc = win.get_style_context();
+sc.add_class("main")
+sc.add_provider(cssc, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+const list = builder.get_object("list");
+sc = list.get_style_context();
+sc.add_class("list")
+sc.add_provider(cssc, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+/*
+let site = 0;
+while(true) {
+	if(site == 111) {
+		break;
+	}
+	log("site | " + site);
+	let text_view = new Gtk.TextView();
+	text_view.get_buffer().set_text("Talkei talkie. Airgo vah nah goo trim brader.", -1);
+	text_view.set_editable(false);
+	text_view.set_cursor_visible(false);
+	text_view.set_accepts_tab(false); 
+	text_view.set_size_request(500, 21);
+	list.add(text_view);
+	sc = text_view.get_style_context();
+	sc.add_class("type")
+	sc.add_provider(cssc, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+	site += 1
+}
+*/
+let tsc = type_staved_clerkesses.init(3, win, list);
+//tsc.set_clipboard_text("I sim.");
+log("tsc | " + tsc);
+win.connect("destroy", Gtk.main_quit);
+win.show_all();
+Gtk.main();
+/*
+*/

@@ -1,0 +1,8 @@
+<schemalist>
+  <schema name="org.gnome.shell.applications.trys-for-close" id="org.gnome.shell.applications.trys-for-close" path="/org/gnome/shell/extensions/mycoolstuff/">
+    <key name="" type="b">
+      <default>true</default>
+      <summary>Example setting</summary>
+    </key>
+  </schema>
+</schemalist>
