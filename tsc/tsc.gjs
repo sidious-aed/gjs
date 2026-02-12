@@ -214,7 +214,7 @@ win.connect("key-press-event", (widget, event) => {
 });
 win.connect('configure-event', (widget, event) => {
 	let [width, height] = widget.get_size();
-	print("configure-event-(resize) | [" + width + ", ", height + "]");
+	//print("configure-event-(resize) | [" + width + ", ", height + "]");
 	return false;
 });
 /*
