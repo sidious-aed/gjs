@@ -112,190 +112,206 @@ let set_brights_with_mods = function(cr, facter) {
 	cr.setSourceRGB((rgb[0]), (rgb[1]), (rgb[2]));
 	return;
 }
-let draw_jet = function(cr) {
-	/*
-	let rbearing = (jet_bearing + 400) % 800;
-	let rightb = (jet_bearing + 600) % 800;
-	let leftb = (jet_bearing + 200) % 800;
-	//print("rbearing | " + rbearing);
-	let x1, y1, x2, y2, x3, y3, x4, y4;
-	// feild-press-nose
-	trig.log_heading("feild-press-nose");
-	cr.setSourceRGB(1, 1, 1);
-	cr.setLineWidth(0.1);
-	b1 = (jet_bearing + 200) % 800;
-	b2 = (jet_bearing + 600) % 800;
-	cr.arc(jet_x, jet_y, 5, trig.naof_radions(b1), trig.naof_radions(b2));
+let draw_engine = function(cr, et_x, et_y) {
+	let revb = (jet_bearing + 400) % 800;
+	let lb = (jet_bearing + 200) % 800;
+	let rb = (jet_bearing + 600) % 800;
+	let eng_et_dr = 5;
+	let eng_flame_dr = 3.2
+	let eng_lai_dr = 20;
+	let x1, y1, x2, y2;
+	let eng_hex = 20;
+	let eng_hexb = ((revb + eng_hex) % 800);
+	let reng_hexb = ((revb + (800 - eng_hex)) % 800);
+	print("et-x | " + et_x);
+	print("et-y | " + et_y);
 
-	// shell-pannell0
-	trig.log_heading("shell-pannell0");
-	//[x1, y1] = trig.get_arch_bearings(rbearing, 0);
-	x1 = jet_x;
-	y1 = jet_y;
-	print("cords | " + [x1, y1]);
-	cr.moveTo(x1, y1);
-	[x2, y2] = trig.get_arch_bearings(rightb, 5);
+	/*
+	print("etr-cords | " + etr_cords);
+
+	[x2, y2] = trig.get_arch_bearings(revb, eng_et_dr);
 	x2 += x1;
 	y2 = y1 - y2;
-	print("cords | " + [x2, y2]);
 	cr.lineTo(x2, y2);
-	[x3, y3] = trig.get_arch_bearings(rbearing, 10);
-	x3 += x2;
-	y3 = y2 - y3;
-	print("cords | " + [x3, y3]);
-	cr.lineTo(x3, y3);
-	[x2, y2] = trig.get_arch_bearings(leftb, 10);
-	x2 += x3;
-	y2 = y3 - y2;
-	print("cords | " + [x2, y2]);
+	let ebr_cords = [x1, y1]
+	print("ebr-cords | " + ebr_cords);
+
+	[x1, y1] = trig.get_arch_bearings(lb, eng_et_dr);
+	x1 += x2;
+	y1 = y2 - y1;
+	cr.lineTo(x1, y1);
+	let ebl_cords = [x1, y1]
+	print("ebl-cords | " + ebl_cords);
+	*/
+
+	cr.moveTo(et_x, et_y);
+	[x1, y1] = trig.get_arch_bearings(rb, eng_et_dr);
+	x1 += et_x;
+	y1 = et_y - y1;
+	cr.lineTo(x1, y1);
+	let etr_cords = [x1, y1];
+	print("etr-cords | " + etr_cords);
+
+	[x2, y2] = trig.get_arch_bearings(eng_hexb, eng_lai_dr);
+	x2 += x1;
+	y2 = y1 - y2;
 	cr.lineTo(x2, y2);
-	[x3, y3] = trig.get_arch_bearings(jet_bearing, 10);
-	x3 += x2;
-	y3 = y2 - y3;
-	print("cords | " + [x3, y3]);
-	cr.lineTo(x3, y3);
-	[x2, y2] = trig.get_arch_bearings(rightb, 5);
-	x2 += x3;
-	y2 = y3 - y2;
-	print("cords | " + [x2, y2]);
+	//print("emr-cords | " + [x2, y2]);
+
+	[x1, y1] = trig.get_arch_bearings(reng_hexb, eng_lai_dr);
+	x1 += x2;
+	y1 = y2 - y1;
+	cr.lineTo(x1, y1);
+	let ebr_cords = [x1, y1];
+
+	[x2, y2] = trig.get_arch_bearings(lb, eng_et_dr);
+	x2 += x1;
+	y2 = y1 - y2;
 	cr.lineTo(x2, y2);
-	cr.setSourceRGB((1), (1), (1));
+
+	[x1, y1] = trig.get_arch_bearings(((eng_hexb + 400) % 800), eng_lai_dr);
+	x1 += x2;
+	y1 = y2 - y1;
+	cr.lineTo(x1, y1);
+	/*
+	*/
+
+	cr.lineTo(et_x, et_y);
+	cr.setSourceRGB((0.3), (0.3), (0.3));
 	cr.closePath();
 	cr.fill();
-	*/
 
-	/*
-	// simple-paper-pie
-	//print("cords | " + [jet_x, jet_y]);
-	let rpb = (jet_bearing + 27) % 800;
-	let brpx, brpy, blpx, blpy;
-	[brpx, brpy] = trig.get_arch_bearings(rpb, 70);
-	brpx += jet_x;
-	brpy += jet_y;
-	//print("cords | " + [brpx, brpy]);
-	let lpb = (jet_bearing + 773) % 800;
-	[blpx, blpy] = trig.get_arch_bearings(lpb, 70);
-	blpx += jet_x;
-	blpy += jet_y;
-	//print("cords | " + [blpx, blpy]);
-	//trig.log_heading("standard-pie-prototype");
-	//[x1, y1] = trig.get_arch_bearings(rbearing, 0);
-	cr.moveTo(jet_x, jet_y);
-	cr.lineTo(brpx, brpy);
-	cr.lineTo(blpx, blpy);
-	cr.moveTo(jet_x, jet_y);
-	cr.setSourceRGB((1), (1), (1));
+	let eng_flame_dr_portion = eng_flame_dr / 2;
+	[x1, y1] = trig.get_arch_bearings(lb, (eng_et_dr - ((eng_et_dr - eng_flame_dr) / 2)));
+	x1 += ebr_cords[0];
+	y1 = ebr_cords[1] - y1;
+	let flame_tr = [x1, y1];
+	cr.moveTo(x1, y1);
+	[x2, y2] = trig.get_arch_bearings(rb, (eng_flame_dr));
+	x2 += x1;
+	y2 = y1 - y2;
+	let flame_tl = [x2, y2];
+	cr.lineTo(x2, y2);
+
+	[x1, y1] = trig.get_arch_bearings(lb, (eng_flame_dr_portion));
+	x1 += x2;
+	y1 = y2 - y1;
+	[x2, y2] = trig.get_arch_bearings(revb, (21 * jet_speed));
+	x2 += x1;
+	y2 = y1 - y2;
+	cr.lineTo(x2, y2);
+
+	cr.lineTo(flame_tr[0], flame_tr[1]);
+	cr.setSourceRGB((0.9), (0.3), (0.3));
 	cr.closePath();
+	cr.fill();
+	/*
 	*/
-
-	// vno-demei
-	trig.log_heading("vno-demei");
+	return;
+}
+let draw_jet = function(cr) {
 	let revb = (jet_bearing + 400) % 800;
-	let lb = (jet_bearing + 600) % 800;
-	let rb = (jet_bearing + 200) % 800;
+	let lb = (jet_bearing + 200) % 800;
+	let rb = (jet_bearing + 600) % 800;
 	print("jet-bearing | " + jet_bearing);
 	print("right-bearing | " + rb);
 	print("left-bearing | " + lb);
 	print("reverse-bearing | " + revb);
+	let stage_0_portion = 11;
+	let press_portion = 8;
 	let x1, y1, x2, y2;
-	// et-press-nose
-	cr.setSourceRGB(1, 1, 1);
-	let press_portion = 7;
-	cr.setLineWidth(press_portion);
-	[x1, y1] = trig.get_arch_bearings(revb, press_portion);
-	x1 += jet_x;
-	y1 = jet_y - y1;
-	// seems a bizar cypher for the radion params; the stamping shouts we are quested to discover from here, instead; a clerk around for now.
-	cr.arc(x1, y1, press_portion, trig.naof_radions(0), trig.naof_radions(800));
-	cr.stroke();
 
-	cr.setSourceRGB(1, 1, 1);
-	cr.setLineWidth(1);
-	cr.arc(jet_x, jet_y, 1, 0, 6.283185307179586);
-	cr.stroke();
-	/*
-	*/
-
+	//var hgns = []; // hgns | hexil-glotch-nodes
+	// ------------
 	// hexil-glotch
-	// ----
-	// nose
-	// ----
-	[x2, y2] = trig.get_arch_bearings(revb, ((press_portion / 1.9) - 3));
-	x2 += jet_x;
-	y2 = jet_y - y2;
-	let nose_et = [x2, y2]
-	print("cords | " + [nose_et[0], nose_et[1]]);
-	cr.moveTo(nose_et[0], nose_et[1]);
+	// ------------
+	// right-stage-0
+	trig.log_heading("core-stage-0-right")
+	var jg = trig.create_bobj(jet_x, jet_y);
+	print("jg | " + [jg.x, jg.y]);
 
+	jg.gg(rb, stage_0_portion);
+	print("jg | " + [jg.x, jg.y]);
+
+	let stage_1_bearing = ((revb + 72) % 800);
+	let stage_1_dam = 21;
+	jg.gg(stage_1_bearing, stage_1_dam);
+	print("jg | " + [jg.x, jg.y]);
+	let rs0b_cords = [jg.x, jg.y];
+
+	// right-stage-1
+	let ldampin_drive = 27;
+	jg.gg(((revb + (800 - 72)) % 800), ldampin_drive);
+	print("jg | " + [jg.x, jg.y]);
+	let com_cords = [jg.x, jg.y];
+
+	// left-stage-0
+	jg.move_to(jet_x, jet_y);
+	jg.gg(lb, stage_0_portion);
+	print("jg | " + [jg.x, jg.y]);
+
+	stage_1_bearing = ((revb + 728) % 800);
+	jg.gg(stage_1_bearing, stage_1_dam);
+	print("jg | " + [jg.x, jg.y]);
+	let left_stage_0_cords = [jg.x, jg.y];
+	let ls0b_cords = [jg.x, jg.y];
+
+	// left-stage-1
+	//jg.move_to(left_stage_0_cords[0], left_stage_0_cords[1]);
+	jg.gg(((revb + 72) % 800), ldampin_drive);
+	let lcom_cords = [jg.x, jg.y];
+	jg.line_to(com_cords[0], com_cords[1]);
+	print("jg | " + [jg.x, jg.y]);
+
+	// right-wing
+	let wing_drive = 39;
+	let wingb = 132;
+	jg.move_to(rs0b_cords[0], rs0b_cords[1]);
+	jg.gg(((rb + (800 - wingb)) % 800), wing_drive);
+	jg.line_to(com_cords[0], com_cords[1]);
+
+	// left-wing
+	jg.move_to(ls0b_cords[0], ls0b_cords[1]);
+	jg.gg(((lb + wingb) % 800), wing_drive);
+	jg.line_to(lcom_cords[0], lcom_cords[1]);
 	/*
-	cr.setSourceRGB(1, 0, 0);
-	cr.setLineWidth(1);
-	cr.arc(nose_et[0], nose_et[1], 1, 0, 6.283185307179586);
-	cr.stroke();
 	*/
 
-	let nose_portion = 10;
-	[x1, y1] = trig.get_arch_bearings(rb, nose_portion);
-	x1 += x2;
-	y1 = y2 - y1;
-	print("cords | " + [x1, y1]);
-	cr.lineTo(x1, y1);
+	[x1, y1] = trig.get_arch_bearings(jet_bearing, (27));
+	com_cords[0] += x1;
+	com_cords[1] -= y1;
+	draw_engine(cr, com_cords[0], com_cords[1]);
+	lcom_cords[0] += x1;
+	lcom_cords[1] -= y1;
+	draw_engine(cr, lcom_cords[0], lcom_cords[1]);
 
-	/*
-	cr.setSourceRGB(1, 0, 0);
-	cr.setLineWidth(1);
-	cr.arc(x1, y1, 1, 0, 6.283185307179586);
-	cr.stroke();
-	*/
+	trig.log_heading("implement-nodes.")
+	let naof_nodes = jg.nodes.length;
+	let hsite = 0;
+	while(true) {
+		if(hsite == naof_nodes) {
+			break;
+		}
+		let node = jg.nodes[hsite];
+		print("node | " + node);
+		if(node[0] == 0) {
+			cr.moveTo(node[1], node[2]);
+		} else {
+			cr.lineTo(node[1], node[2]);
+		}
+		/*
+		cr.setSourceRGB(1, 0, 0);
+		cr.setLineWidth(1);
+		cr.arc(node[1], node[2], 1, 0, 6.283185307179586);
+		cr.stroke();
+		*/
+		hsite += 1;
+	}
 
-	let nose_drive = (nose_portion * 0.7);
-	let nose_bearing = revb + 17;
-	[x2, y2] = trig.get_arch_bearings(nose_bearing, nose_drive);
-	x2 += x1;
-	y2 = y1 - y2;
-	print("cords | " + [x2, y2]);
-	cr.lineTo(x2, y2);
-	let nbr = [x2, y2];
-
-	/*
-	cr.setSourceRGB(1, 0, 0);
-	cr.setLineWidth(1);
-	cr.arc(x2, y2, 1, 0, 6.283185307179586);
-	cr.stroke();
-	*/
-
-	cr.moveTo(nose_et[0], nose_et[1]);
-	[x1, y1] = trig.get_arch_bearings(lb, nose_portion);
-	x1 += nose_et[0];
-	y1 = nose_et[1] - y1;
-	print("cords | " + [x2, y2]);
-	cr.lineTo(x1, y1);
-
-	/*
-	cr.setSourceRGB(1, 0, 0);
-	cr.setLineWidth(1);
-	cr.arc(x1, y1, 1, 0, 6.283185307179586);
-	cr.stroke();
-	*/
-
-	nose_bearing = revb - 17;
-	[x2, y2] = trig.get_arch_bearings(nose_bearing, nose_drive);
-	x2 += x1;
-	y2 = y1 - y2;
-	print("cords | " + [x2, y2]);
-	cr.lineTo(x2, y2);
-	cr.lineTo(nbr[0], nbr[1]);
-
-	/*
-	cr.setSourceRGB(1, 0, 0);
-	cr.setLineWidth(1);
-	cr.arc(x2, y2, 1, 0, 6.283185307179586);
-	cr.stroke();
-	*/
-
-	cr.setSourceRGB((1), (0), (0));
+	cr.setSourceRGBA((0.3), (0.3), (0.3), 1);
 	cr.closePath();
 	cr.fill();
+	return;
 }
 
 let equanaox_name = undefined;
@@ -479,7 +495,9 @@ win.connect("key-press-event", (widget, event) => {
 		return true; // Event handled
 	} else if(keyval == Gdk.KEY_Up) {
 		jet_speed += 0.1;
-		jet_speed %= 1;
+		if(jet_speed > 1) {
+			jet_speed = 1;
+		}
 		//print("jet-speed | " + jet_speed);
 	} else if(keyval == Gdk.KEY_Down) {
 		jet_speed -= 0.1;
