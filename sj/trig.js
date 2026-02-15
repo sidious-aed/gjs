@@ -3,7 +3,7 @@ let i_sim = function() {
 }
 
 let create_bobj = function(x, y) {
-	print("create-bobj.");
+	//print("create-bobj.");
 	let bobj = {
 		x: x,
 		y: y,
@@ -29,7 +29,7 @@ let create_bobj = function(x, y) {
 			} else {
 				fmode = 1;
 			}
-			print("mode | " + mode);
+			//print("mode | " + mode);
 			let d2 = distance * distance;
 			let hb = Math.sqrt(d2 / 2); // hb | height-breadth
 			//print("hb | " + hb);
@@ -41,7 +41,7 @@ let create_bobj = function(x, y) {
 			} else if(fmode == 1) {
 				facter = (1 - (arch_archions / 100.0));
 			}
-			print("facter | " + facter);
+			//print("facter | " + facter);
 			let y = hb * (facter);
 			//print("y | " + y);
 			let y2 = y * y;
@@ -88,7 +88,7 @@ let create_bobj = function(x, y) {
 					cords = [x, -y]
 				}
 			}
-			print("bobj-cords | " + cords);
+			//print("bobj-cords | " + cords);
 			this.x += cords[0];
 			this.y = this.y - cords[1];
 			this.nodes.push([1, this.x, this.y])
@@ -166,7 +166,7 @@ let get_arch_bearings = function(archions, distance) {
 	} else if(mode == 7) {
 		cords = [x, -y]
 	}
-	print("bearing-to-grid-change-cords | " + cords);
+	//print("bearing-to-grid-change-cords | " + cords);
 	return cords;
 }
 

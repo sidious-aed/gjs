@@ -5,16 +5,31 @@ const Cairo = imports.cairo;
 const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const Clutter = imports.gi.Clutter;
+const Gst = imports.gi.Gst;
 imports.searchPath.push(".");
 const trig = imports.trig;
 //const iSim = imports.lib0;
 //iSim.i_sim();
 
 Gtk.init(null);
+Gst.init(null);
 let display = Gdk.Display.get_default();
 let win = new Gtk.Window({ title: "sj@fearsome" });
 win.set_default_size(727, 727);
 win.connect('destroy', Gtk.main_quit);
+let engines_player = Gst.ElementFactory.make("playbin", "player");
+engines_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/sj-engines-s.wav");
+let engines_pipeline = new Gst.Pipeline();
+engines_pipeline.add(engines_player);
+let engines_bus = engines_pipeline.get_bus();
+engines_bus.add_signal_watch();
+engines_bus.connect("message", (bus, message) => {
+	if (message.type === Gst.MessageType.EOS) {
+		engines_player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT, 0);
+		engines_player.set_state(Gst.State.PLAYING);
+	}
+});
+let engines_mode = 0;
 
 let drawingArea = new Gtk.DrawingArea();
 win.add(drawingArea);
@@ -35,6 +50,7 @@ while(true) {
 const radion_breadth = 6.283185307179586;
 const naof_equanaox_micro_seconds = 60000;
 const naof_quarter_equanaox_micro_seconds = naof_equanaox_micro_seconds / 2;
+let equanaox_facter;
 let width;
 let height;
 let ot = Date.now();
@@ -43,6 +59,8 @@ let jet_bearing = 200;
 let jet_x = 200;
 let jet_y = 200;
 let jet_speed = 0.0;
+let balistics = [];
+let balistics_site = 0;
 const secter_star_might = 7000;
 const bwidth = 1920;
 const bheight = 1080;
@@ -112,19 +130,21 @@ let set_brights_with_mods = function(cr, facter) {
 	cr.setSourceRGB((rgb[0]), (rgb[1]), (rgb[2]));
 	return;
 }
+let jbright;
 let draw_engine = function(cr, et_x, et_y) {
 	let revb = (jet_bearing + 400) % 800;
 	let lb = (jet_bearing + 200) % 800;
 	let rb = (jet_bearing + 600) % 800;
 	let eng_et_dr = 5;
+	let eng_et_drp = eng_et_dr / 2;
 	let eng_flame_dr = 3.2
-	let eng_lai_dr = 20;
+	let eng_lai_dr = 11;
 	let x1, y1, x2, y2;
 	let eng_hex = 20;
 	let eng_hexb = ((revb + eng_hex) % 800);
 	let reng_hexb = ((revb + (800 - eng_hex)) % 800);
-	print("et-x | " + et_x);
-	print("et-y | " + et_y);
+	//print("et-x | " + et_x);
+	//print("et-y | " + et_y);
 
 	/*
 	print("etr-cords | " + etr_cords);
@@ -145,12 +165,12 @@ let draw_engine = function(cr, et_x, et_y) {
 	*/
 
 	cr.moveTo(et_x, et_y);
-	[x1, y1] = trig.get_arch_bearings(rb, eng_et_dr);
+	[x1, y1] = trig.get_arch_bearings(rb, eng_et_drp);
 	x1 += et_x;
 	y1 = et_y - y1;
 	cr.lineTo(x1, y1);
 	let etr_cords = [x1, y1];
-	print("etr-cords | " + etr_cords);
+	//print("etr-cords | " + etr_cords);
 
 	[x2, y2] = trig.get_arch_bearings(eng_hexb, eng_lai_dr);
 	x2 += x1;
@@ -173,11 +193,16 @@ let draw_engine = function(cr, et_x, et_y) {
 	x1 += x2;
 	y1 = y2 - y1;
 	cr.lineTo(x1, y1);
+
+	[x2, y2] = trig.get_arch_bearings(((reng_hexb + 400) % 800), eng_lai_dr);
+	x2 += x1;
+	y2 = y1 - y2;
+	cr.lineTo(x2, y2);
 	/*
 	*/
 
 	cr.lineTo(et_x, et_y);
-	cr.setSourceRGB((0.3), (0.3), (0.3));
+	cr.setSourceRGB((jbright), (jbright), (jbright));
 	cr.closePath();
 	cr.fill();
 
@@ -213,12 +238,13 @@ let draw_jet = function(cr) {
 	let revb = (jet_bearing + 400) % 800;
 	let lb = (jet_bearing + 200) % 800;
 	let rb = (jet_bearing + 600) % 800;
-	print("jet-bearing | " + jet_bearing);
-	print("right-bearing | " + rb);
-	print("left-bearing | " + lb);
-	print("reverse-bearing | " + revb);
-	let stage_0_portion = 11;
+	//print("jet-bearing | " + jet_bearing);
+	//print("right-bearing | " + rb);
+	//print("left-bearing | " + lb);
+	//print("reverse-bearing | " + revb);
+	let stage_0_portion = 7;
 	let press_portion = 8;
+	let wing_in = 7;
 	let x1, y1, x2, y2;
 
 	//var hgns = []; // hgns | hexil-glotch-nodes
@@ -226,66 +252,118 @@ let draw_jet = function(cr) {
 	// hexil-glotch
 	// ------------
 	// right-stage-0
-	trig.log_heading("core-stage-0-right")
+	//trig.log_heading("core-stage-0-right")
 	var jg = trig.create_bobj(jet_x, jet_y);
-	print("jg | " + [jg.x, jg.y]);
+	//print("jg | " + [jg.x, jg.y]);
 
 	jg.gg(rb, stage_0_portion);
-	print("jg | " + [jg.x, jg.y]);
+	//print("jg | " + [jg.x, jg.y]);
 
 	let stage_1_bearing = ((revb + 72) % 800);
 	let stage_1_dam = 21;
-	jg.gg(stage_1_bearing, stage_1_dam);
-	print("jg | " + [jg.x, jg.y]);
-	let rs0b_cords = [jg.x, jg.y];
+	jg.gg(stage_1_bearing, wing_in);
+	let rwec = [jg.x, jg.y];
+	jg.gg(stage_1_bearing, (stage_1_dam - wing_in));
+	//print("jg | " + [jg.x, jg.y]);
 
 	// right-stage-1
 	let ldampin_drive = 27;
-	jg.gg(((revb + (800 - 72)) % 800), ldampin_drive);
-	print("jg | " + [jg.x, jg.y]);
+	let rs1b = ((revb + (800 - 72)) % 800);
+	jg.gg((rs1b), (wing_in));
+	let rs0b_cords = [jg.x, jg.y];
+	jg.gg((rs1b), (ldampin_drive - (wing_in * 2)));
+	let wcom_cords = [jg.x, jg.y];
+	jg.gg((rs1b), ((wing_in)));
 	let com_cords = [jg.x, jg.y];
+	//print("jg | " + [jg.x, jg.y]);
 
 	// left-stage-0
 	jg.move_to(jet_x, jet_y);
 	jg.gg(lb, stage_0_portion);
-	print("jg | " + [jg.x, jg.y]);
+	//print("jg | " + [jg.x, jg.y]);
 
 	stage_1_bearing = ((revb + 728) % 800);
-	jg.gg(stage_1_bearing, stage_1_dam);
-	print("jg | " + [jg.x, jg.y]);
+	jg.gg(stage_1_bearing, wing_in);
+	let lwec = [jg.x, jg.y];
+	jg.gg(stage_1_bearing, (stage_1_dam - wing_in));
+	//print("jg | " + [jg.x, jg.y]);
 	let left_stage_0_cords = [jg.x, jg.y];
-	let ls0b_cords = [jg.x, jg.y];
 
 	// left-stage-1
-	//jg.move_to(left_stage_0_cords[0], left_stage_0_cords[1]);
-	jg.gg(((revb + 72) % 800), ldampin_drive);
+	let ls1b = ((revb + 72) % 800);
+	jg.gg((ls1b), (wing_in));
+	let ls0b_cords = [jg.x, jg.y];
+	jg.gg((ls1b), (ldampin_drive - (wing_in * 2)));
+	let lwcom_cords = [jg.x, jg.y];
+	jg.gg((ls1b), ((wing_in)));
 	let lcom_cords = [jg.x, jg.y];
 	jg.line_to(com_cords[0], com_cords[1]);
-	print("jg | " + [jg.x, jg.y]);
 
 	// right-wing
 	let wing_drive = 39;
-	let wingb = 132;
-	jg.move_to(rs0b_cords[0], rs0b_cords[1]);
+	let wingb = 111;
+	jg.move_to(rwec[0], rwec[1]);
 	jg.gg(((rb + (800 - wingb)) % 800), wing_drive);
-	jg.line_to(com_cords[0], com_cords[1]);
+	jg.line_to(wcom_cords[0], wcom_cords[1]);
 
 	// left-wing
-	jg.move_to(ls0b_cords[0], ls0b_cords[1]);
+	jg.move_to(lwec[0], lwec[1]);
 	jg.gg(((lb + wingb) % 800), wing_drive);
-	jg.line_to(lcom_cords[0], lcom_cords[1]);
+	jg.line_to(lwcom_cords[0], lwcom_cords[1]);
 	/*
 	*/
 
-	[x1, y1] = trig.get_arch_bearings(jet_bearing, (27));
+	//draw_engine(cr, 50, (height - 50), 0);
+	let engineb = 21;
+	let engineh = 7;
+	[x1, y1] = trig.get_arch_bearings(jet_bearing, (engineb));
 	com_cords[0] += x1;
 	com_cords[1] -= y1;
-	draw_engine(cr, com_cords[0], com_cords[1]);
+	[x1, y1] = trig.get_arch_bearings(rb, (engineh));
+	com_cords[0] += x1;
+	com_cords[1] -= y1;
+	draw_engine(cr, com_cords[0], com_cords[1], 0);
+	[x1, y1] = trig.get_arch_bearings(jet_bearing, (engineb));
 	lcom_cords[0] += x1;
 	lcom_cords[1] -= y1;
-	draw_engine(cr, lcom_cords[0], lcom_cords[1]);
+	[x1, y1] = trig.get_arch_bearings(lb, (engineh));
+	lcom_cords[0] += x1;
+	lcom_cords[1] -= y1;
+	draw_engine(cr, lcom_cords[0], lcom_cords[1], 1);
 
-	trig.log_heading("implement-nodes.")
+	let beng_flame_dr = 5;
+	let beng_flame_drp = beng_flame_dr / 2;
+	[x1, y1] = trig.get_arch_bearings(revb, (42));
+	x1 += jet_x;
+	y1 = jet_y - y1;
+	let mflame_et = [x1, y1];
+
+	[x2, y2] = trig.get_arch_bearings(lb, (beng_flame_drp));
+	x2 += mflame_et[0];
+	y2 = mflame_et[1] - y2;
+	//cr.lineTo(x2, y2);
+	cr.moveTo(x2, y2);
+	let lfc = [x2, y2];
+
+	[x2, y2] = trig.get_arch_bearings(rb, (beng_flame_drp));
+	x2 += mflame_et[0];
+	y2 = mflame_et[1] - y2;
+	cr.lineTo(x2, y2);
+
+	[x1, y1] = trig.get_arch_bearings(revb, (21 * jet_speed * 1.27));
+	//[x1, y1] = trig.get_arch_bearings(revb, (21));
+	x1 += mflame_et[0];
+	y1 = mflame_et[1] - y1;
+	cr.lineTo(x1, y1);
+	cr.lineTo(lfc[0], lfc[1]);
+
+	cr.setSourceRGB((0.9), (0.3), (0.3));
+	cr.closePath();
+	cr.fill();
+	/*
+	*/
+
+	//trig.log_heading("implement-nodes.")
 	let naof_nodes = jg.nodes.length;
 	let hsite = 0;
 	while(true) {
@@ -293,7 +371,7 @@ let draw_jet = function(cr) {
 			break;
 		}
 		let node = jg.nodes[hsite];
-		print("node | " + node);
+		//print("node | " + node);
 		if(node[0] == 0) {
 			cr.moveTo(node[1], node[2]);
 		} else {
@@ -307,8 +385,10 @@ let draw_jet = function(cr) {
 		*/
 		hsite += 1;
 	}
-
-	cr.setSourceRGBA((0.3), (0.3), (0.3), 1);
+	/*
+	*/
+	cr.setSourceRGBA((jbright), (jbright), (jbright), 1);
+	//cr.setSourceRGBA((0.0), (0.0), (0.0), 1);
 	cr.closePath();
 	cr.fill();
 	return;
@@ -334,7 +414,6 @@ drawingArea.connect('draw', (widget, cr) => {
 	equanaox_site %= 2;
 	//print("equanaox-site | " + equanaox_site);
 	//print("elapsed | " + elapsed);
-	let equanaox_facter;
 	if(equanaox_site == 0) {
 		// day
 		if(elapsed < naof_quarter_equanaox_micro_seconds) {
@@ -374,6 +453,34 @@ drawingArea.connect('draw', (widget, cr) => {
 			bdir = [1, 1, 1]
 		}
 	}
+	//print("equanaox_facter | " + equanaox_facter);
+	jbright = equanaox_facter;
+	if(jbright < 0.25) {
+		jbright *= 4;
+	} else if((jbright > 0.25) && (jbright <= 0.5)) {
+		jbright = 0.5 - jbright;
+		jbright *= 4;
+	} else if((jbright > 0.5) && (jbright <= 0.75)) {
+		jbright -= 0.5;
+		jbright *= 4;
+	} else if((jbright > 0.75) && (jbright <= 1)) {
+		jbright -= 0.5;
+		jbright = 0.5 - jbright;
+		jbright *= 4;
+	}
+	if((equanaox_name == "dawn") || (equanaox_name == "dusk")) {
+		if(jbright >= 0.2) {
+			jbright = 0.2;
+		}
+	} else if((equanaox_name == "shock") || (equanaox_name == "noom")) {
+		if(jbright <= 0.3) {
+			jbright = 0.3;
+		}
+		if(jbright >= 0.7) {
+			jbright = 0.7;
+		}
+	}
+	//print("jbright | " + jbright);
 	//print("equanaox-name | " + equanaox_name);
 	//print("equanaox-facter | " + equanaox_facter);
 	//print("rgb  | " + rgb);
@@ -407,6 +514,40 @@ drawingArea.connect('draw', (widget, cr) => {
 		draw_stars(cr);
 	}
 	draw_jet(cr);
+
+	let bx, by;
+	let naof_balistics = balistics.length;
+	let bsite = 0;
+	while(true) {
+		if(bsite == naof_balistics) {
+			break;
+		}
+		let balistic = balistics[bsite];
+		print("balistic | " + balistic);
+		if(balistic[4] == 0) {
+			cr.setSourceRGB(0.8, 0.8, 0.8);
+		} else if(balistic[4] == 1) {
+			cr.setSourceRGB(0.9, 0.4, 0.4);
+		} else if(balistic[4] == 2) {
+			cr.setSourceRGB(0.4, 0.9, 0.4);
+		}
+		cr.setLineWidth(0.7);
+		cr.arc(balistic[1], balistic[2], 0.7, 0, 6.283185307179586);
+		cr.stroke();
+		/*
+		*/
+		/*
+		cr.moveTo(balistic[1], balistic[2]);
+		[bx, by] = trig.get_arch_bearings(balistic[0], 10);
+		bx += balistic[1];
+		by = balistic[2] - by;
+		cr.lineTo(bx, by);
+		cr.closePath();
+		cr.setLineWidth(2);
+		cr.fill();
+		*/
+		bsite += 1;
+	}
 	return false; // Propagate event
 });
 
@@ -450,6 +591,42 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 		jet_y = jet_y - height;
 		direction = 3;
 	}
+	let bx, by;
+	let naof_balistics = balistics.length;
+	//print("naof-balistics | " + naof_balistics);
+	let bsite = 0;
+	while(true) {
+		if(bsite == naof_balistics) {
+			break;
+		}
+		let balistic = balistics[bsite];
+		//print("balistic | " + balistic);
+		[bx, by] = trig.get_arch_bearings(balistic[0], 10);
+		//print("[bx, by] | " + [bx, by]);
+		bx += balistic[1];
+		by = balistic[2] - by;
+		let in_view = 1;
+		if((bx < 0) || (bx > width) || (by < 0) || (by > height)) {
+			in_view = 0;
+		}
+		//print("[bx, by] | " + [bx, by]);
+		balistics[bsite] = [balistic[0], bx, by, in_view, balistic[4]];
+		//print("balistics[bsite] | " + balistics[bsite]);
+		bsite += 1;
+	}
+	let new_balistics = [];
+	bsite = 0;
+	while(true) {
+		if(bsite == naof_balistics) {
+			break;
+		}
+		let balistic = balistics[bsite];
+		if(balistic[3]) {
+			new_balistics.push(balistic);
+		}
+		bsite += 1;
+	}
+	balistics = new_balistics;
 	if(in_new_folds) {
 		/*
 		// seems ancient features are ratcheded.
@@ -486,7 +663,7 @@ let fs_mode = 0;
 win.connect("key-press-event", (widget, event) => {
 	// Get key value
 	let [, keyval] = event.get_keyval();
-	//print("key | " + keyval);
+	print("key | " + keyval);
 
 	// Check for specific key (e.g., Escape)
 	if (keyval == Gdk.KEY_Escape) {
@@ -498,6 +675,11 @@ win.connect("key-press-event", (widget, event) => {
 		if(jet_speed > 1) {
 			jet_speed = 1;
 		}
+		if((engines_mode == 0) && (jet_speed > 0)) {
+			engines_pipeline.set_state(Gst.State.PLAYING);
+			engines_mode = 1;
+		}
+		engines_player.set_property("volume", jet_speed);
 		//print("jet-speed | " + jet_speed);
 	} else if(keyval == Gdk.KEY_Down) {
 		jet_speed -= 0.1;
@@ -505,6 +687,11 @@ win.connect("key-press-event", (widget, event) => {
 			jet_speed = 0;
 		}
 		//print("jet-speed | " + jet_speed);
+		if((engines_mode == 1) && (jet_speed == 0)) {
+			engines_pipeline.set_state(Gst.State.READY);
+			engines_mode = 0;
+		}
+		engines_player.set_property("volume", jet_speed);
 	} else if(keyval == Gdk.KEY_Left) {
 		jet_bearing = (jet_bearing + 10) % 800;
 		//print("jet-bearing | " + jet_bearing);
@@ -529,6 +716,19 @@ win.connect("key-press-event", (widget, event) => {
 			//Clutter.get_default_backend().set_cursor_visible(true);
 			fs_mode = 0;
 		}
+		return true;
+	} else if(keyval == 32) {
+		print("space pressed.");
+		let tracer_mode = 0;
+		if((balistics_site % 5) == 0) {
+			tracer_mode = 1;
+			if(Math.random() >= 0.5) {
+				tracer_mode = 2;
+			}
+		}
+		print("tracer-mode | " + tracer_mode);
+		balistics.push([jet_bearing, jet_x, jet_y, 1, tracer_mode]);
+		balistics_site += 1;
 		return true;
 	}
 	return false; // Propagate event
