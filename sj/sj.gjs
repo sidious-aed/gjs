@@ -78,6 +78,7 @@ let ordinance = [];
 let ordinance_site = 0;
 let rocket_summon_time = 10000;
 let naof_rockets = 4;
+let lets = [];
 let sumon_rocket_complete = function() {
 	//log("rocket-summoned.");
 	naof_rockets += 1;
@@ -118,7 +119,7 @@ let seed_stars = function() {
 let draw_star = function(cr, x, y, b) {
 	cr.setSourceRGB(1, 1, 1);
 	cr.setLineWidth(b);
-	cr.arc(x, y, b, 0, 6.283185307179586);
+	cr.arc(x, y, b, 0, radion_breadth);
 	cr.stroke();
 	return;
 }
@@ -448,6 +449,7 @@ let ancient_equanaox_name = undefined;
 let cloud_site = undefined;
 let ancient_cloud_site = undefined;
 let ancient_cloud_direction = undefined;
+let elapsed;
 drawingArea.connect('draw', (widget, cr) => {
 	let revb = (jet_bearing + 400) % 800;
 	let lb = (jet_bearing + 200) % 800;
@@ -459,7 +461,7 @@ drawingArea.connect('draw', (widget, cr) => {
 	// wide-eco
 	//print("ot | " + ot);
 	//print("t | " + t);
-	let elapsed = t - ot;
+	elapsed = t - ot;
 	//print("elapsed | " + elapsed);
 	let equanaox_site = parseInt(elapsed / naof_equanaox_micro_seconds);
 	elapsed -= (equanaox_site * naof_equanaox_micro_seconds);
@@ -598,11 +600,11 @@ drawingArea.connect('draw', (widget, cr) => {
 		jg.draw(cr);
 		cr.closePath();
 		if(balistic[4] == 0) {
-			cr.setSourceRGB(0.8, 0.8, 0.8);
+			cr.setSourceRGB(0.3, 0.3, 0.3);
 		} else if(balistic[4] == 1) {
-			cr.setSourceRGB(0.9, 0.4, 0.4);
+			cr.setSourceRGB(0.9, 0.1, 0.1);
 		} else if(balistic[4] == 2) {
-			cr.setSourceRGB(0.4, 0.9, 0.4);
+			cr.setSourceRGB(0.1, 0.9, 0.1);
 		}
 		cr.fill();
 
@@ -650,7 +652,7 @@ drawingArea.connect('draw', (widget, cr) => {
 		jg.gg((rb), (dbdebth_thip));
 		jg.draw(cr);
 		cr.closePath();
-		cr.setSourceRGB(1, 1, 1);
+		cr.setSourceRGB((0.7), (0.7), (0.7));
 		cr.fill();
 
 		/*
@@ -665,6 +667,50 @@ drawingArea.connect('draw', (widget, cr) => {
 		*/
 		osite += 1;
 	}
+
+	let new_lets = []
+	let naof_lets = lets.length;
+	let lsite = 0;
+	while(true) {
+		if(lsite == naof_lets) {
+			break;
+		}
+		let tlet = lets[lsite];
+		print("tlet | " + tlet);
+		let naof_plane_up_participles = parseInt(Math.random() * 1271);
+		let tsite = 0;
+		while(true) {
+			if(tsite == naof_plane_up_participles) {
+				break;
+			}
+			//[x1, y1] = trig.get_arch_bearings((Math.random() * 800), (Math.random() * 31));
+			[x1, y1] = trig.get_arch_bearings((Math.random() * 800), (Math.random() * 21));
+			//[x1, y1] = trig.get_arch_bearings((Math.random() * 800), (Math.random() * 27));
+			x1 += tlet[0];
+			y1 = tlet[1] - y1;
+			let redb = (Math.random() * 0.2) + 0.8;
+			let bp = redb / 6;
+			let tmode = Math.random();
+			if(tmode >= 0.5) {
+				cr.setSourceRGBA(redb, bp, 0, Math.random());
+			} else {
+				cr.setSourceRGBA(redb, 0, bp, Math.random());
+			}
+			let radius = (Math.random() * 1.6);
+			cr.setLineWidth((radius * 2));
+			cr.arc(x1, y1, (radius), 0, radion_breadth);
+			cr.stroke();
+			tsite += 1;
+		}
+		/*
+		*/
+		tlet[2] -= 1;
+		if(tlet[2] > 0) {
+			new_lets.push(tlet);
+		}
+		lsite += 1;
+	}
+	lets = new_lets;
 	draw_jet(cr);
 	return false; // Propagate event
 });
@@ -775,6 +821,21 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 		if(distance > to[5]) {
 			in_view = 0;
 		}
+		if(in_view == 0) {
+			lets.push([ox, oy, 17]);
+			if(Math.random() >= 0.6666666666666666) {
+				GLib.timeout_add(GLib.PRIORITY_DEFAULT, (Math.random() * 500), function() {
+					let folds_master_goes_solid_player = Gst.ElementFactory.make("playbin", "player");
+					folds_master_goes_solid_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/jet-rocket-stay.wav");
+					folds_master_goes_solid_player.set_property("volume", ((Math.random() * 0.4) + 0.6));
+					folds_master_goes_solid_player.set_state(Gst.State.PLAYING);
+				});
+			}
+			let dragon_aux_stay_player = Gst.ElementFactory.make("playbin", "player");
+			dragon_aux_stay_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/dragon-aux-s.wav");
+			dragon_aux_stay_player.set_property("volume", ((Math.random() * 0.4) + 0.6));
+			dragon_aux_stay_player.set_state(Gst.State.PLAYING);
+		}
 		//print("[ox, oy] | " + [ox, oy]);
 		ordinance[bsite] = [to[0], ox, oy, in_view, distance, to[5]];
 		//print("ordinance[osite] | " + ordinance[osite]);
@@ -829,6 +890,7 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 
 let fs_mode = 0;
 let balm = 0;
+let rsafty = false;
 win.connect("key-press-event", (widget, event) => {
 	let revb = (jet_bearing + 400) % 800;
 	let lb = (jet_bearing + 200) % 800;
@@ -866,6 +928,17 @@ win.connect("key-press-event", (widget, event) => {
 		engines_player.set_property("volume", jet_speed);
 	} else if(keyval == Gdk.KEY_Left) {
 		jet_bearing = (jet_bearing + 10) % 800;
+		//print("jet-bearing | " + jet_bearing);
+		return true;
+	} else if(keyval == 39) {
+		jet_bearing = (jet_bearing - 1);
+		if(jet_bearing < 0) {
+			jet_bearing += 800;
+		}
+		//print("jet-bearing | " + jet_bearing);
+		return true;
+	} else if(keyval == 59) {
+		jet_bearing = (jet_bearing + 1) % 800;
 		//print("jet-bearing | " + jet_bearing);
 		return true;
 	} else if(keyval == Gdk.KEY_Right) {
@@ -917,28 +990,39 @@ win.connect("key-press-event", (widget, event) => {
 		}
 		return true;
 	} else if(keyval == 115) {
-		let brockd = 21;
-		let wrockd = 7;
-		if(naof_rockets > 0) {
-			print("rocket send.");
-			//ordinance.push([jet_bearing, jet_x, jet_y, 1, tracer_mode, 0, jet_bodebth]);
-			naof_rockets -= 1;
-			var jg = trig.create_bobj(jet_x, jet_y);
-			jg.gg(revb, brockd);
-			if((ordinance_site & 1) == 0) {
-				jg.gg(rb, wrockd);
+		if(rsafty == false) {
+			let brockd = 21;
+			let wrockd = 7;
+			if(naof_rockets > 0) {
+				print("rocket send.");
+				//ordinance.push([jet_bearing, jet_x, jet_y, 1, tracer_mode, 0, jet_bodebth]);
+				naof_rockets -= 1;
+				var jg = trig.create_bobj(jet_x, jet_y);
+				jg.gg(revb, brockd);
+				if((ordinance_site & 1) == 0) {
+					jg.gg(rb, wrockd);
+				} else {
+					jg.gg(lb, wrockd);
+				}
+				let rocket_send_player = Gst.ElementFactory.make("playbin", "player");
+				rocket_send_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/jet-rocket-send.wav");
+				rocket_send_player.set_property("volume", 0.9);
+				rocket_send_player.set_state(Gst.State.PLAYING);
+				GLib.timeout_add(GLib.PRIORITY_DEFAULT, 750, function() {
+					ordinance.push([jet_bearing, jg.x, jg.y, 1, 0, jet_bodebth]);
+				})
+				ordinance_site += 1;
 			} else {
-				jg.gg(lb, wrockd);
+				print("pending rocket summon.");
+				rsafty = true;
+				let warmer_alert_player = Gst.ElementFactory.make("playbin", "player");
+				warmer_alert_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/warmer-alert-ss.wav");
+				warmer_alert_player.set_property("volume", 0.9);
+				warmer_alert_player.set_state(Gst.State.PLAYING);
+				GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, function() {
+					rsafty = false;
+				});
 			}
-			ordinance.push([jet_bearing, jg.x, jg.y, 1, 0, jet_bodebth]);
-			ordinance_site += 1;
-		} else {
-			print("pending rocket summon.");
-			let warmer_alert_player = Gst.ElementFactory.make("playbin", "player");
-			warmer_alert_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/warmer-alert-ss.wav");
-			warmer_alert_player.set_property("volume", 0.9);
-			warmer_alert_player.set_state(Gst.State.READY);
-			warmer_alert_player.set_state(Gst.State.PLAYING);
 		}
 		return true;
 	}
