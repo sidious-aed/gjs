@@ -93,6 +93,29 @@ let create_bobj = function(x, y) {
 			this.y = this.y - cords[1];
 			this.nodes.push([1, this.x, this.y])
 			return cords;
+		},
+		draw: function(cr) {
+			let naof_nodes = this.nodes.length;
+			let hsite = 0;
+			while(true) {
+				if(hsite == naof_nodes) {
+					break;
+				}
+				let node = this.nodes[hsite];
+				//print("node | " + node);
+				if(node[0] == 0) {
+					cr.moveTo(node[1], node[2]);
+				} else {
+					cr.lineTo(node[1], node[2]);
+				}
+				/*
+				cr.setSourceRGB(1, 0, 0);
+				cr.setLineWidth(1);
+				cr.arc(node[1], node[2], 1, 0, 6.283185307179586);
+				cr.stroke();
+				*/
+				hsite += 1;
+			}
 		}
 	}
 	return bobj;

@@ -30,6 +30,18 @@ engines_bus.connect("message", (bus, message) => {
 	}
 });
 let engines_mode = 0;
+let canons_player = Gst.ElementFactory.make("playbin", "player");
+canons_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/jet-cannons-s.wav");
+let canons_pipeline = new Gst.Pipeline();
+canons_pipeline.add(canons_player);
+let canons_bus = canons_pipeline.get_bus();
+canons_bus.add_signal_watch();
+canons_bus.connect("message", (bus, message) => {
+	if (message.type === Gst.MessageType.EOS) {
+		canons_player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT, 0);
+		canons_player.set_state(Gst.State.PLAYING);
+	}
+});
 
 let drawingArea = new Gtk.DrawingArea();
 win.add(drawingArea);
@@ -59,8 +71,21 @@ let jet_bearing = 200;
 let jet_x = 200;
 let jet_y = 200;
 let jet_speed = 0.0;
+let jet_bodebth = 100;
 let balistics = [];
 let balistics_site = 0;
+let ordinance = [];
+let ordinance_site = 0;
+let rocket_summon_time = 10000;
+let naof_rockets = 4;
+let sumon_rocket_complete = function() {
+	//log("rocket-summoned.");
+	naof_rockets += 1;
+	GLib.timeout_add(GLib.PRIORITY_DEFAULT, rocket_summon_time, sumon_rocket_complete);
+	return GLib.SOURCE_REMOVE; 
+}
+GLib.timeout_add(GLib.PRIORITY_DEFAULT, rocket_summon_time, sumon_rocket_complete);
+
 const secter_star_might = 7000;
 const bwidth = 1920;
 const bheight = 1080;
@@ -201,8 +226,9 @@ let draw_engine = function(cr, et_x, et_y) {
 	/*
 	*/
 
+	let jbp = jbright / 2;
 	cr.lineTo(et_x, et_y);
-	cr.setSourceRGB((jbright), (jbright), (jbright));
+	cr.setSourceRGB((jbp), (jbp), (jbp));
 	cr.closePath();
 	cr.fill();
 
@@ -363,6 +389,8 @@ let draw_jet = function(cr) {
 	/*
 	*/
 
+	jg.draw(cr);
+	/*
 	//trig.log_heading("implement-nodes.")
 	let naof_nodes = jg.nodes.length;
 	let hsite = 0;
@@ -377,18 +405,39 @@ let draw_jet = function(cr) {
 		} else {
 			cr.lineTo(node[1], node[2]);
 		}
-		/*
-		cr.setSourceRGB(1, 0, 0);
-		cr.setLineWidth(1);
-		cr.arc(node[1], node[2], 1, 0, 6.283185307179586);
-		cr.stroke();
-		*/
 		hsite += 1;
 	}
+	*/
 	/*
+	cr.setSourceRGB(1, 0, 0);
+	cr.setLineWidth(1);
+	cr.arc(node[1], node[2], 1, 0, 6.283185307179586);
+	cr.stroke();
 	*/
 	cr.setSourceRGBA((jbright), (jbright), (jbright), 1);
 	//cr.setSourceRGBA((0.0), (0.0), (0.0), 1);
+	cr.closePath();
+	cr.fill();
+
+	// draw-obdebth-res
+	let bodebth_thi = 2;
+	let bodebth_thip = bodebth_thi / 2;
+	let bodebth_wie = 41;
+	let bodebth_wie_p = bodebth_wie / 2;
+	[x1, y1] = trig.get_arch_bearings(jet_bearing, (jet_bodebth));
+	x1 += jet_x;
+	y1 = jet_y - y1;
+	[x2, y2] = trig.get_arch_bearings(revb, (bodebth_thip));
+	x2 += x1;
+	y2 = y1 - y2;
+	jg = trig.create_bobj(x2, y2);
+	jg.gg((rb), (bodebth_wie_p));
+	jg.gg((jet_bearing), (bodebth_thi));
+	jg.gg((lb), (bodebth_wie));
+	jg.gg((revb), (bodebth_thi));
+	jg.gg((rb), (bodebth_wie_p));
+	jg.draw(cr);
+	cr.setSourceRGB((0.9), (0.2), (0.2));
 	cr.closePath();
 	cr.fill();
 	return;
@@ -400,6 +449,9 @@ let cloud_site = undefined;
 let ancient_cloud_site = undefined;
 let ancient_cloud_direction = undefined;
 drawingArea.connect('draw', (widget, cr) => {
+	let revb = (jet_bearing + 400) % 800;
+	let lb = (jet_bearing + 200) % 800;
+	let rb = (jet_bearing + 600) % 800;
 	// Get width/height
 	width = widget.get_allocated_width();
 	height = widget.get_allocated_height();
@@ -513,7 +565,6 @@ drawingArea.connect('draw', (widget, cr) => {
 	} else if((equanaox_name == "shock") || (equanaox_name == "noom")) {
 		draw_stars(cr);
 	}
-	draw_jet(cr);
 
 	let bx, by;
 	let naof_balistics = balistics.length;
@@ -524,6 +575,28 @@ drawingArea.connect('draw', (widget, cr) => {
 		}
 		let balistic = balistics[bsite];
 		print("balistic | " + balistic);
+		/*
+		cr.setLineWidth(0.7);
+		cr.arc(balistic[1], balistic[2], 0.7, 0, 6.283185307179586);
+		cr.stroke();
+		*/
+
+		// draw-dbalis
+		let dbdebth_thi = 1;
+		let dbdebth_thip = dbdebth_thi / 2;
+		let dbdebth_wie = 5;
+		let dbdebth_wie_p = dbdebth_wie / 2;
+		[x1, y1] = trig.get_arch_bearings(revb, (dbdebth_wie_p));
+		x1 += balistic[1];
+		y1 = balistic[2] - y1;
+		jg = trig.create_bobj(x1, y1);
+		jg.gg((rb), (dbdebth_thip));
+		jg.gg((jet_bearing), (dbdebth_wie));
+		jg.gg((lb), (dbdebth_thi));
+		jg.gg((revb), (dbdebth_wie));
+		jg.gg((rb), (dbdebth_thip));
+		jg.draw(cr);
+		cr.closePath();
 		if(balistic[4] == 0) {
 			cr.setSourceRGB(0.8, 0.8, 0.8);
 		} else if(balistic[4] == 1) {
@@ -531,11 +604,8 @@ drawingArea.connect('draw', (widget, cr) => {
 		} else if(balistic[4] == 2) {
 			cr.setSourceRGB(0.4, 0.9, 0.4);
 		}
-		cr.setLineWidth(0.7);
-		cr.arc(balistic[1], balistic[2], 0.7, 0, 6.283185307179586);
-		cr.stroke();
-		/*
-		*/
+		cr.fill();
+
 		/*
 		cr.moveTo(balistic[1], balistic[2]);
 		[bx, by] = trig.get_arch_bearings(balistic[0], 10);
@@ -548,6 +618,54 @@ drawingArea.connect('draw', (widget, cr) => {
 		*/
 		bsite += 1;
 	}
+
+	let ox, oy;
+	let naof_ordinance = ordinance.length;
+	let osite = 0;
+	while(true) {
+		if(osite == naof_ordinance) {
+			break;
+		}
+		let to = ordinance[osite];
+		print("to | " + to);
+		/*
+		cr.setLineWidth(0.7);
+		cr.arc(to[1], to[2], 0.7, 0, 6.283185307179586);
+		cr.stroke();
+		*/
+
+		// draw-dbalis
+		let dbdebth_thi = 1.5;
+		let dbdebth_thip = dbdebth_thi / 2;
+		let dbdebth_wie = 7;
+		let dbdebth_wie_p = dbdebth_wie / 2;
+		[x1, y1] = trig.get_arch_bearings(revb, (dbdebth_wie_p));
+		x1 += to[1];
+		y1 = to[2] - y1;
+		jg = trig.create_bobj(x1, y1);
+		jg.gg((rb), (dbdebth_thip));
+		jg.gg((jet_bearing), (dbdebth_wie));
+		jg.gg((lb), (dbdebth_thi));
+		jg.gg((revb), (dbdebth_wie));
+		jg.gg((rb), (dbdebth_thip));
+		jg.draw(cr);
+		cr.closePath();
+		cr.setSourceRGB(1, 1, 1);
+		cr.fill();
+
+		/*
+		cr.moveTo(to[1], to[2]);
+		[ox, oy] = trig.get_arch_bearings(to[0], 10);
+		ox += to[1];
+		oy = to[2] - oy;
+		cr.lineTo(ox, oy);
+		cr.closePath();
+		cr.setLineWidth(2);
+		cr.fill();
+		*/
+		osite += 1;
+	}
+	draw_jet(cr);
 	return false; // Propagate event
 });
 
@@ -594,6 +712,7 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 	let bx, by;
 	let naof_balistics = balistics.length;
 	//print("naof-balistics | " + naof_balistics);
+	let bspeed = 10;
 	let bsite = 0;
 	while(true) {
 		if(bsite == naof_balistics) {
@@ -601,7 +720,8 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 		}
 		let balistic = balistics[bsite];
 		//print("balistic | " + balistic);
-		[bx, by] = trig.get_arch_bearings(balistic[0], 10);
+		[bx, by] = trig.get_arch_bearings(balistic[0], bspeed);
+		let distance = balistic[5] + bspeed;
 		//print("[bx, by] | " + [bx, by]);
 		bx += balistic[1];
 		by = balistic[2] - by;
@@ -609,8 +729,11 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 		if((bx < 0) || (bx > width) || (by < 0) || (by > height)) {
 			in_view = 0;
 		}
+		if(distance > balistic[6]) {
+			in_view = 0;
+		}
 		//print("[bx, by] | " + [bx, by]);
-		balistics[bsite] = [balistic[0], bx, by, in_view, balistic[4]];
+		balistics[bsite] = [balistic[0], bx, by, in_view, balistic[4], distance, balistic[6]];
 		//print("balistics[bsite] | " + balistics[bsite]);
 		bsite += 1;
 	}
@@ -627,6 +750,50 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 		bsite += 1;
 	}
 	balistics = new_balistics;
+
+	//ordinance.push([jet_bearing, jg.x, jg.y, 1, 0, jet_bodebth]);
+	let ox, oy;
+	let naof_ordinance = ordinance.length;
+	//print("naof-ordinance | " + naof_ordinance);
+	let ospeed = 11;
+	let osite = 0;
+	while(true) {
+		if(osite == naof_ordinance) {
+			break;
+		}
+		let to = ordinance[osite];
+		//print("to | " + to);
+		[ox, oy] = trig.get_arch_bearings(to[0], ospeed);
+		let distance = to[4] + ospeed;
+		//print("[ox, oy] | " + [ox, oy]);
+		ox += to[1];
+		oy = to[2] - oy;
+		let in_view = 1;
+		if((bx < 0) || (bx > width) || (by < 0) || (by > height)) {
+			in_view = 0;
+		}
+		if(distance > to[5]) {
+			in_view = 0;
+		}
+		//print("[ox, oy] | " + [ox, oy]);
+		ordinance[bsite] = [to[0], ox, oy, in_view, distance, to[5]];
+		//print("ordinance[osite] | " + ordinance[osite]);
+		osite += 1;
+	}
+	let new_ordinance = [];
+	osite = 0;
+	while(true) {
+		if(osite == naof_ordinance) {
+			break;
+		}
+		let to = ordinance[bsite];
+		if(to[3]) {
+			new_ordinance.push(to);
+		}
+		osite += 1;
+	}
+	ordinance = new_ordinance;
+
 	if(in_new_folds) {
 		/*
 		// seems ancient features are ratcheded.
@@ -656,11 +823,16 @@ GLib.timeout_add(GLib.PRIORITY_HIGH, 16, () => {
 			seed_stars();
 		}
 	}
+	print("Naof-Rockets | " + naof_rockets);
 	return true; // Keep timer running
 });
 
 let fs_mode = 0;
+let balm = 0;
 win.connect("key-press-event", (widget, event) => {
+	let revb = (jet_bearing + 400) % 800;
+	let lb = (jet_bearing + 200) % 800;
+	let rb = (jet_bearing + 600) % 800;
 	// Get key value
 	let [, keyval] = event.get_keyval();
 	print("key | " + keyval);
@@ -703,9 +875,6 @@ win.connect("key-press-event", (widget, event) => {
 		}
 		//print("jet-bearing | " + jet_bearing);
 		return true;
-	} else if(keyval == 115) {
-		print("s pressed.");
-		return true;
 	} else if(keyval == Gdk.KEY_F11) {
 		print("in fs-toggle");
 		if(fs_mode == 0) {
@@ -717,6 +886,18 @@ win.connect("key-press-event", (widget, event) => {
 			fs_mode = 0;
 		}
 		return true;
+	} else if(keyval == 44) {
+		jet_bodebth -= 4;
+		if(jet_bodebth < 20) {
+			jet_bodebth = 20;
+		}
+		return true;
+	} else if(keyval == 46) {
+		jet_bodebth += 4;
+		if(jet_bodebth > width) {
+			jet_bodebth = width;
+		}
+		return true;
 	} else if(keyval == 32) {
 		print("space pressed.");
 		let tracer_mode = 0;
@@ -726,12 +907,55 @@ win.connect("key-press-event", (widget, event) => {
 				tracer_mode = 2;
 			}
 		}
-		print("tracer-mode | " + tracer_mode);
-		balistics.push([jet_bearing, jet_x, jet_y, 1, tracer_mode]);
+		//print("tracer-mode | " + tracer_mode);
+		balistics.push([jet_bearing, jet_x, jet_y, 1, tracer_mode, 0, jet_bodebth]);
 		balistics_site += 1;
+		if(balm == 0) {
+			canons_player.set_property("volume", 0.3);
+			canons_pipeline.set_state(Gst.State.PLAYING);
+			balm = 1;
+		}
+		return true;
+	} else if(keyval == 115) {
+		let brockd = 21;
+		let wrockd = 7;
+		if(naof_rockets > 0) {
+			print("rocket send.");
+			//ordinance.push([jet_bearing, jet_x, jet_y, 1, tracer_mode, 0, jet_bodebth]);
+			naof_rockets -= 1;
+			var jg = trig.create_bobj(jet_x, jet_y);
+			jg.gg(revb, brockd);
+			if((ordinance_site & 1) == 0) {
+				jg.gg(rb, wrockd);
+			} else {
+				jg.gg(lb, wrockd);
+			}
+			ordinance.push([jet_bearing, jg.x, jg.y, 1, 0, jet_bodebth]);
+			ordinance_site += 1;
+		} else {
+			print("pending rocket summon.");
+			let warmer_alert_player = Gst.ElementFactory.make("playbin", "player");
+			warmer_alert_player.set_property("uri", "file:///home/tyrel/gjs/sj/sound/warmer-alert-ss.wav");
+			warmer_alert_player.set_property("volume", 0.9);
+			warmer_alert_player.set_state(Gst.State.READY);
+			warmer_alert_player.set_state(Gst.State.PLAYING);
+		}
 		return true;
 	}
 	return false; // Propagate event
+});
+win.connect("key-release-event", (widget, event) => {
+	// Get key value
+	let [, keyval] = event.get_keyval();
+	print("key-release | " + keyval);
+
+	// Check for specific key (e.g., Escape)
+	if (keyval == 32) {
+		print("space-bar released.");
+		canons_pipeline.set_state(Gst.State.READY);
+		balm = 0;
+		return true; // Event handled
+	}
 });
 win.connect('configure-event', (widget, event) => {
 	let [swidth, sheight] = widget.get_size();
