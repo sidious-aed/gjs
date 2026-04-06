@@ -93,6 +93,9 @@ let type_staved_clerkesses = {
 					//log("noaf-lets | " + naof_lets);
 					tsc.pad = tsc.pad.slice(naof_lets, pad_site)
 				}
+				if(new_entree == "") {
+					return;
+				}
 				tsc.pad.push(new_entree);
 				//log("pad | " + tsc.pad);
 				let types = tsc.list.get_children();
